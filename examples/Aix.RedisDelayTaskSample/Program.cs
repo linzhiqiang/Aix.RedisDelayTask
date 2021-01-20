@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Hosting;
+﻿using Aix.RedisDelayTaskSample.Model;
+using CommandLine;
+using Microsoft.Extensions.Hosting;
 using System;
 
 namespace Aix.RedisDelayTaskSample
@@ -7,7 +9,17 @@ namespace Aix.RedisDelayTaskSample
     {
         static void Main(string[] args)
         {
-            CreateHostBuilder(args).Build().Run();
+            Parser parser = new Parser((setting) =>
+            {
+                setting.CaseSensitive = false;
+            });
+
+            parser.ParseArguments<CmdOptions>(args).WithParsed((options) =>
+            {
+                CmdOptions.Options = options;
+                CreateHostBuilder(args).Build().Run();
+            });
+            //CreateHostBuilder(args).Build().Run();
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args)

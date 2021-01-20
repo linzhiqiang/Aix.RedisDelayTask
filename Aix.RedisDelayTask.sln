@@ -5,11 +5,11 @@ VisualStudioVersion = 16.0.30907.101
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{C4BCD99F-CC9C-4E63-9C09-F26D1A256D66}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aix.RedisDelayTask", "src\Aix.RedisDelayTask\Aix.RedisDelayTask\Aix.RedisDelayTask.csproj", "{07CB60BA-817C-4040-875C-DA52550FF36B}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "examples", "examples", "{A7B12AF2-A44E-4667-9A7E-6107A836DCFE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aix.RedisDelayTaskSample", "examples\Aix.RedisDelayTaskSample\Aix.RedisDelayTaskSample.csproj", "{BCBF2604-D7ED-4281-8CEE-028F8936F7A0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aix.RedisDelayTaskSample", "examples\Aix.RedisDelayTaskSample\Aix.RedisDelayTaskSample.csproj", "{BCBF2604-D7ED-4281-8CEE-028F8936F7A0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aix.RedisDelayTask", "src\Aix.RedisDelayTask\Aix.RedisDelayTask.csproj", "{7467CF9A-DBC0-4C15-8045-E9F372339176}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,21 +17,21 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{07CB60BA-817C-4040-875C-DA52550FF36B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{07CB60BA-817C-4040-875C-DA52550FF36B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{07CB60BA-817C-4040-875C-DA52550FF36B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{07CB60BA-817C-4040-875C-DA52550FF36B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{BCBF2604-D7ED-4281-8CEE-028F8936F7A0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{BCBF2604-D7ED-4281-8CEE-028F8936F7A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BCBF2604-D7ED-4281-8CEE-028F8936F7A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BCBF2604-D7ED-4281-8CEE-028F8936F7A0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7467CF9A-DBC0-4C15-8045-E9F372339176}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7467CF9A-DBC0-4C15-8045-E9F372339176}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7467CF9A-DBC0-4C15-8045-E9F372339176}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7467CF9A-DBC0-4C15-8045-E9F372339176}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{07CB60BA-817C-4040-875C-DA52550FF36B} = {C4BCD99F-CC9C-4E63-9C09-F26D1A256D66}
 		{BCBF2604-D7ED-4281-8CEE-028F8936F7A0} = {A7B12AF2-A44E-4667-9A7E-6107A836DCFE}
+		{7467CF9A-DBC0-4C15-8045-E9F372339176} = {C4BCD99F-CC9C-4E63-9C09-F26D1A256D66}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {543E47A2-4C69-4905-A300-D53630B584DB}
