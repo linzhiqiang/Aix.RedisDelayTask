@@ -15,11 +15,20 @@ namespace Aix.RedisDelayTask
         /// <summary>
         ///  新增延迟任务
         /// </summary>
-        /// <param name="content"></param>
+        /// <param name="taskContent">字符串任务内容</param>
         /// <param name="delay"></param>
         /// <param name="delayTaskExInfo"></param>
         /// <returns></returns>
-        Task<string> PublishAsync( string content, TimeSpan delay, DelayTaskExInfo delayTaskExInfo=null);
+        Task<string> PublishAsync( string taskContent, TimeSpan delay, DelayTaskExInfo delayTaskExInfo=null);
+
+        /// <summary>
+        /// 新增延迟任务
+        /// </summary>
+        /// <param name="taskBytesContent">二进制任务内容</param>
+        /// <param name="delay"></param>
+        /// <param name="delayTaskExInfo"></param>
+        /// <returns></returns>
+        Task<string> PublishAsync(byte[] taskBytesContent, TimeSpan delay, DelayTaskExInfo delayTaskExInfo = null);
 
         /// <summary>
         /// 返回true 不进行重试，返回false 进行重试，抛出异常也进行重试（建议捕获异常 决定是否重试）

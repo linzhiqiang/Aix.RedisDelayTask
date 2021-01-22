@@ -11,22 +11,26 @@ using System.Threading.Tasks;
 
 namespace Aix.RedisDelayTask.Impl
 {
-    public class RedisStorage
+    internal class RedisStorage
     {
         private IServiceProvider _serviceProvider;
         private ConnectionMultiplexer _redis = null;
         private IDatabase _database;
         private RedisDelayTaskOptions _options;
-        private readonly RedisSubscription _delayJobChannelSubscription;
+        //private readonly RedisSubscription _delayJobChannelSubscription;
+        private readonly RedisDelayTaskSubscriptionEx  _redisSubscriptionEx;
 
-        public RedisStorage(IServiceProvider serviceProvider, ConnectionMultiplexer redis, RedisDelayTaskOptions options)
+        public RedisStorage(IServiceProvider serviceProvider, ConnectionMultiplexer redis, 
+            RedisDelayTaskOptions options,
+            RedisDelayTaskSubscriptionEx redisSubscriptionEx)
         {
             _serviceProvider = serviceProvider;
             this._redis = redis;
             this._options = options;
             _database = redis.GetDatabase();
 
-            _delayJobChannelSubscription = new RedisSubscription(_serviceProvider, _redis.GetSubscriber(), Helper.GetDelayChannel(_options));
+            //_delayJobChannelSubscription = new RedisSubscription(_serviceProvider, _redis.GetSubscriber(), Helper.GetDelayChannel(_options));
+            _redisSubscriptionEx = redisSubscriptionEx; //new RedisSubscriptionEx(_serviceProvider, _redis.GetSubscriber(), Helper.GetDelayChannel(_options));
         }
 
         public async Task<bool> EnqueueDealy(TaskData taskData,TimeSpan delay)
@@ -45,9 +49,11 @@ namespace Aix.RedisDelayTask.Impl
             var result = await trans.ExecuteAsync();
 
             //时间很短的 通过发布订阅及时通知
-            if (delay < TimeSpan.FromSeconds(_options.DelayTaskPreReadSecond))
+            if (delay < TimeSpan.FromMilliseconds(_options.PreReadMillisecond))
             {
-                await _database.PublishAsync(_delayJobChannelSubscription.Channel, delayTopic);
+                //await _database.PublishAsync(_delayJobChannelSubscription.Channel, delayTopic);
+                await _database.PublishAsync(_redisSubscriptionEx.Channel, delayTopic); //这里的value是delayTopic
+
             }
 
             return result;
@@ -103,9 +109,10 @@ namespace Aix.RedisDelayTask.Impl
             return result;
         }
 
-        public void WaitForDelayJob(TimeSpan timeSpan, CancellationToken cancellationToken = default(CancellationToken))
+        public void WaitForDelayJob(string delayTopicName,TimeSpan timeSpan, CancellationToken cancellationToken = default(CancellationToken))
         {
-            _delayJobChannelSubscription.WaitForJob(timeSpan, cancellationToken);
+            // _delayJobChannelSubscription.WaitForJob(timeSpan, cancellationToken);
+            _redisSubscriptionEx.WaitForJob(delayTopicName,timeSpan, cancellationToken);
         }
 
         public async Task<HashEntry[]> HashGetAll(string key)

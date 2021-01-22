@@ -63,8 +63,13 @@ namespace Aix.RedisDelayTaskSample.HostServices
                             Content = $"我是内容_{i}",
                             CreateTime = DateTime.Now
                         };
-                        //await _messageBus.PublishAsync(messageData);
-                        await _delayTaskService.PublishAsync(JsonUtils.ToJson( messageData), TimeSpan.FromSeconds(13));
+
+                        //json
+                        //  await _delayTaskService.PublishAsync(JsonUtils.ToJson( messageData), TimeSpan.FromSeconds(4));
+
+                        //二进制
+                        var bytesData = Encoding.UTF8.GetBytes(JsonUtils.ToJson(messageData));
+                        await _delayTaskService.PublishAsync(bytesData, TimeSpan.FromSeconds(4));
                         _logger.LogInformation($"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss fff")}生产数据：MessageId={messageData.MessageId}");
                         //await Task.Delay(5);
                     }

@@ -1,4 +1,5 @@
-﻿using Aix.RedisDelayTask.Impl;
+﻿using Aix.RedisDelayTask.Foundation;
+using Aix.RedisDelayTask.Impl;
 using Aix.RedisDelayTask.Utils;
 using Microsoft.Extensions.DependencyInjection;
 using StackExchange.Redis;
@@ -33,8 +34,10 @@ namespace Aix.RedisDelayTask
             }
 
             services.AddSingleton<IDelayTaskLifetime, DelayTaskLifetime>();
+            services.AddSingleton<DelayTaskProducer>();
             services.AddSingleton<IDelayTaskService, DelayTaskService>();
             services.AddSingleton<RedisStorage>();
+            services.AddSingleton<RedisDelayTaskSubscriptionEx>();
             return services;
         }
 
@@ -42,7 +45,7 @@ namespace Aix.RedisDelayTask
         {
             AssertUtils.IsTrue(options.DelayTopicCount >=1, "请配置DelayTopicCount参数");
             AssertUtils.IsTrue(options.DelayTaskPullLockSecond >=10 && options.DelayTaskPullLockSecond <=300, "DelayTaskPullLockSecond取值范围[10,300]");
-            AssertUtils.IsTrue(options.DelayTaskPreReadSecond >= 5 && options.DelayTaskPreReadSecond <= 60, "DelayTaskPreReadSecond取值范围[5,60]");
+            AssertUtils.IsTrue(options.PreReadMillisecond >= 100 && options.PreReadMillisecond <= 60*1000, "DelayTaskPreReadSecond取值范围[1,60]");
             AssertUtils.IsTrue(options.DelayTaskExpireHour >=24, "DelayTaskExpireHour最小值是24");
         }
     }

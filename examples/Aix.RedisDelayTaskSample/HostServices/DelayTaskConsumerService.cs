@@ -1,4 +1,5 @@
 ﻿using Aix.RedisDelayTask;
+using Aix.RedisDelayTaskSample.Model;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
@@ -43,7 +44,17 @@ namespace Aix.RedisDelayTaskSample.HostServices
         {
             var current = Interlocked.Increment(ref Count);
             //Console.WriteLine($"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss fff")}--{delayTaskResult.TaskContent}");
-            _logger.LogInformation($"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss fff")}消费数据：{delayTaskResult.TaskContent}----count={current}");
+            if (delayTaskResult.TaskBytesContent != null && delayTaskResult.TaskBytesContent.Length > 0)
+            {
+                var data = JsonUtils.FromJson<BusinessMessage>(Encoding.UTF8.GetString(delayTaskResult.TaskBytesContent));
+                _logger.LogInformation($"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss fff")}消费数据：{data.Content}----count={current}");
+            }
+
+            else
+            {
+                var data = JsonUtils.FromJson<BusinessMessage>(delayTaskResult.TaskContent);
+                _logger.LogInformation($"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss fff")}消费数据：{data.Content}----count={current}");
+            }
             await Task.CompletedTask;
             return true;
         }

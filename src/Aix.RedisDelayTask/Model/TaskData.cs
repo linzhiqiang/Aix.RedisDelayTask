@@ -8,13 +8,14 @@ namespace Aix.RedisDelayTask.Model
 {
     public class TaskData
     {
+        static byte[] BytesEmpty = new byte[0];
         public static TaskData Create(string taskContent, TimeSpan delay, DelayTaskExInfo delayTaskExInfo = null)
         {
-            var temp =  new TaskData
+            var temp = new TaskData
             {
                 TaskGroup = delayTaskExInfo?.TaskGroup ?? "",
                 TaskContent = taskContent,
-               // ExecuteTime = DateUtils.GetTimeStamp(DateTime.Now.Add(delay))
+                // ExecuteTime = DateUtils.GetTimeStamp(DateTime.Now.Add(delay))
             };
             if (delayTaskExInfo != null && !string.IsNullOrEmpty(delayTaskExInfo.Id))
             {
@@ -38,6 +39,8 @@ namespace Aix.RedisDelayTask.Model
 
         public string TaskContent { get; set; }
 
+        public byte[] TaskBytesContent { get; set; }
+
         /// <summary>
         /// 执行时间  时间戳 毫秒数
         /// </summary>
@@ -50,7 +53,7 @@ namespace Aix.RedisDelayTask.Model
 
         public void ResetExecuteTime(TimeSpan delay)
         {
-           // ExecuteTime = DateUtils.GetTimeStamp(DateTime.Now.Add(delay));
+            // ExecuteTime = DateUtils.GetTimeStamp(DateTime.Now.Add(delay));
         }
 
 
@@ -67,7 +70,7 @@ namespace Aix.RedisDelayTask.Model
                  new NameValueEntry(nameof( TaskData.Id),taskData.Id?? ""),
                   new NameValueEntry(nameof( TaskData.TaskGroup),taskData.TaskGroup?? ""),
                   new NameValueEntry(nameof( TaskData.TaskContent),taskData.TaskContent?? ""),
-                // new NameValueEntry(nameof( TaskData.ExecuteTime),taskData.ExecuteTime),
+                  new NameValueEntry(nameof( TaskData.TaskBytesContent),taskData.TaskBytesContent ?? BytesEmpty),
                   new NameValueEntry(nameof( TaskData.ErrorRetryCount),taskData.ErrorRetryCount),
                 };
             return nameValues;
@@ -81,7 +84,7 @@ namespace Aix.RedisDelayTask.Model
                 new HashEntry(nameof( TaskData.Id),taskData.Id?? ""),
                   new HashEntry(nameof( TaskData.TaskGroup),taskData.TaskGroup?? ""),
                   new HashEntry(nameof( TaskData.TaskContent),taskData.TaskContent?? ""),
-                 // new HashEntry(nameof( TaskData.ExecuteTime),taskData.ExecuteTime),
+                 new HashEntry(nameof( TaskData.TaskBytesContent),taskData.TaskBytesContent ?? BytesEmpty),
                  new HashEntry(nameof( TaskData.ErrorRetryCount),taskData.ErrorRetryCount),
                 };
 
@@ -102,7 +105,7 @@ namespace Aix.RedisDelayTask.Model
                 Id = keyValues.GetValue(nameof(TaskData.Id)),
                 TaskGroup = keyValues.GetValue(nameof(TaskData.TaskGroup)),
                 TaskContent = keyValues.GetValue(nameof(TaskData.TaskContent)),
-               // ExecuteTime = NumberUtils.ToLong(keyValues.GetValue(nameof(TaskData.ExecuteTime))),
+                TaskBytesContent = keyValues.GetValue(nameof(TaskData.TaskBytesContent)),
                 ErrorRetryCount = NumberUtils.ToInt(keyValues.GetValue(nameof(TaskData.ErrorRetryCount))),
             };
 

@@ -18,6 +18,8 @@ namespace Aix.RedisDelayTaskSample
 
             services.AddRedisDelayTask(options=> {
                 options.ConnectionString = "127.0.0.1:6379";
+                options.DelayTopicCount = 10;
+               options.PreReadMillisecond = 5000;
             });
 
             #endregion

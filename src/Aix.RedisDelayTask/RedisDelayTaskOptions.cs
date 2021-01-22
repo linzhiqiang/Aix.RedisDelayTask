@@ -37,7 +37,7 @@ namespace Aix.RedisDelayTask
         /// <summary>
         /// 延迟任务预处数据时间 内部有订阅延迟时间小于该值的任务，所以也支持小于该值的任务  默认10秒（不建议更小，可以更大）
         /// </summary>
-        public int DelayTaskPreReadSecond { get; set; } = 10;
+        public int PreReadMillisecond { get; set; } = 10000;
 
         /// <summary>
         /// 延迟任务拉取数据锁定时间，并发控制 默认60秒

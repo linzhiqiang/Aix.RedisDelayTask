@@ -17,10 +17,11 @@ namespace Aix.RedisDelayTask.Impl
         private IServiceProvider _serviceProvider;
         private string _delayTopicName;
         private ILogger<DelayTaskConsumer> _logger;
+        private DelayTaskProducer _delayTaskProducer;
         private RedisDelayTaskOptions _options;
         private RedisStorage _redisStorage;
         private int BatchCount = 100; //一次拉取多少条
-        private int PreReadSecond = 10; //提前读取多长数据
+
         private readonly IDelayTaskLifetime _delayTaskLifetime;
 
         private RepeatChecker _repeatStartChecker = new RepeatChecker();
@@ -32,11 +33,11 @@ namespace Aix.RedisDelayTask.Impl
         {
             _serviceProvider = serviceProvider;
             _delayTopicName = delayTopicName;
+            _delayTaskProducer = _serviceProvider.GetService<DelayTaskProducer>();
             _logger = _serviceProvider.GetService<ILogger<DelayTaskConsumer>>();
             _options = _serviceProvider.GetService<RedisDelayTaskOptions>();
             _delayTaskLifetime = _serviceProvider.GetService<IDelayTaskLifetime>();
             _redisStorage = _serviceProvider.GetService<RedisStorage>();
-
         }
 
         public Task Start(CancellationToken cancellationToken = default)
@@ -72,7 +73,7 @@ namespace Aix.RedisDelayTask.Impl
             return Task.CompletedTask;
         }
 
-        public async Task Execute()
+        private async Task Execute()
         {
             var lockKey = Helper.GetDelayLock(_options, _delayTopicName);
             long delay = 0; //毫秒
@@ -80,36 +81,36 @@ namespace Aix.RedisDelayTask.Impl
            {
                var now = DateTime.Now;
                var maxScore = DateUtils.GetTimeStamp(now);
-               var list = await _redisStorage.GetTopDueDealyJobId(_delayTopicName, maxScore + PreReadSecond * 1000, BatchCount); //多查询1秒的数据，便于精确控制延迟
+               var list = await _redisStorage.GetTopDueDealyJobId(_delayTopicName, maxScore + _options.PreReadMillisecond + 1000, BatchCount); //多查询1秒的数据，便于精确控制延迟
 
-                foreach (var item in list)
+               foreach (var item in list)
                {
                    StoppingToken.ThrowIfCancellationRequested();
                    if (item.Value > maxScore) //预拉去了PreReadSecond秒的数据，可能有还没到时间的
-                    {
+                   {
                        delay = item.Value - maxScore;
                        break;
                    }
 
                    var jobId = item.Key;
-                    // 延时任务到期加入即时任务队列
-                    var hashEntities = await _redisStorage.HashGetAll(Helper.GetJobHashId(_options, jobId));//这里要出错了呢
-                    TaskData taskData = ToTaskData(hashEntities);
-                    //执行任务
-                    await ExecuteDelayTask(taskData, jobId);
+                   // 延时任务到期加入即时任务队列
+                   var hashEntities = await _redisStorage.HashGetAll(Helper.GetJobHashId(_options, jobId));//这里要出错了呢
+                   TaskData taskData = ToTaskData(hashEntities);
+                   //执行任务
+                   await ExecuteDelayTask(taskData, jobId);
                }
 
                if (list.Count == 0)//没有数据时
-                {
-                   delay = PreReadSecond * 1000;
+               {
+                   delay = _options.PreReadMillisecond;
                }
 
-           }, async () => await TaskEx.DelayNoException(PreReadSecond * 1000, StoppingToken)); //出现并发也休息一会
+           }, async () => await TaskEx.DelayNoException(_options.PreReadMillisecond, StoppingToken)); //出现并发也休息一会
 
             if (delay > 0)
             {
-                var minDelay = Math.Min((int)delay, PreReadSecond * 1000);
-                _redisStorage.WaitForDelayJob(TimeSpan.FromMilliseconds(minDelay), StoppingToken);
+                var minDelay = Math.Min((int)delay, _options.PreReadMillisecond);
+                _redisStorage.WaitForDelayJob(_delayTopicName, TimeSpan.FromMilliseconds(minDelay), StoppingToken);
             }
         }
 
@@ -149,6 +150,7 @@ namespace Aix.RedisDelayTask.Impl
                     Id = taskData.Id,
                     TaskGroup = taskData.TaskGroup,
                     TaskContent = taskData.TaskContent,
+                    TaskBytesContent = taskData.TaskBytesContent,
                     ErrorRetryCount = taskData.ErrorRetryCount
                 };
                 isSuccess = await OnMessage(result);
@@ -175,7 +177,8 @@ namespace Aix.RedisDelayTask.Impl
                 taskData.ResetExecuteTime(TimeSpan.FromSeconds(delaySecond));
                 taskData.ErrorRetryCount++;
 
-                await _redisStorage.EnqueueDealy(taskData, TimeSpan.FromSeconds(delaySecond));
+                //await _redisStorage.EnqueueDealy(taskData, TimeSpan.FromSeconds(delaySecond));
+                await _delayTaskProducer.EnqueueDealy(taskData, TimeSpan.FromSeconds(delaySecond));
                 _logger.LogInformation($"Aix.RedisDelayTask消费失败,{taskData.TaskContent},{delaySecond}秒后将进行{taskData.ErrorRetryCount }次重试");
             }
         }
